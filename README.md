@@ -1,97 +1,46 @@
-# holiday-booking-prediction-randomforest
-✈️ Holiday Booking Prediction using Random Forest This project builds a machine learning model to predict whether a customer will book a holiday package based on their booking and travel behavior. The dataset contains historical customer booking data, and the aim is to help travel/airline companies identify potential customers
-# ✈️ Holiday Booking Prediction using Random Forest
+# Holiday booking prediction (Random Forest)
 
-![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
-![Scikit-learn](https://img.shields.io/badge/Scikit--learn-1.0+-orange.svg)
-![Pandas](https://img.shields.io/badge/Pandas-1.3+-yellow.svg)
-![Status](https://img.shields.io/badge/Status-Completed-brightgreen.svg)
+Predicts whether a customer completes a holiday booking, using British Airways booking data (Forage job simulation). The model is tuned for recall: it tries not to miss real buyers, and accepts more false alarms in return.
 
-## 📌 Project Overview
-This project predicts whether a customer will **book a holiday** based on their booking and travel behavior.  
-Using historical customer booking data, the model helps travel and airline companies **identify potential customers before they make a purchase decision**.
+## Data
 
-We implemented a **Random Forest Classifier** for prediction and evaluated the model using metrics like **Accuracy, Precision, Recall, F1-score**, and a **Confusion Matrix**.
+`customer_booking.csv`: 50,000 bookings, 13 features plus the target `booking_complete`.
+Only 14.8% of rows are bookings that completed (1,480 of 10,000 in the test split), so the classes are imbalanced.
 
----
+Features include passengers, sales channel, trip type, purchase lead time, length of stay, flight day and hour, route, booking origin, and extras (baggage, seat, meals).
 
-## 🎯 Objectives
-- Preprocess and clean raw customer booking data.
-- Train and evaluate a Random Forest model.
-- Interpret results and draw actionable insights.
-- Visualize performance metrics and feature importance.
+## Method
 
----
+1. Encode text columns (`LabelEncoder`), map weekdays to 1 to 7.
+2. 80/20 train/test split, `random_state=42`.
+3. Random Forest with `GridSearchCV` (108 settings, 3-fold, scored on recall), with class weights to handle the imbalance.
 
-## 📂 Dataset
-The dataset contains customer booking records with features like:
-- Demographic details
-- Travel dates
-- Booking patterns
-- Destination preferences
+Best settings: `max_depth=10`, `min_samples_leaf=4`, `min_samples_split=10`, 200 to 300 trees, balanced class weights.
 
-*(Dataset is available in `/data` folder — `customer_booking.csv`)*
+## Results (test split of 10,000)
 
----
+| | Precision | Recall | F1 |
+|---|---|---|---|
+| No booking | 0.93 | 0.71 | 0.81 |
+| Booking | 0.30 | 0.71 | 0.42 |
 
-## 🛠 Tech Stack
-- **Programming Language:** Python  
-- **Libraries:** Pandas, NumPy, Scikit-learn, Matplotlib, Seaborn  
-- **Model:** Random Forest Classifier  
+Overall accuracy: **70.8%**.
 
----
+How to read it: the model finds about 7 in 10 real buyers (recall 0.71), but only 3 in 10 people it flags actually buy (precision 0.30). Accuracy alone would hide this, which is why recall was the tuning goal.
 
-## 📊 Results & Insights
-- Model is **more accurate in detecting non-buyers** than buyers.
-- **High false positives** → potential for marketing budget waste.
-- Good **recall for buyers** → fewer missed potential customers.
-- Accuracy can be improved with:
-  - **Hyperparameter tuning**
-  - **Feature engineering**
-  - **Balancing the dataset**
+## Next steps
 
----
+- Try gradient boosting (XGBoost, LightGBM) and compare.
+- Pick the decision threshold from the cost of a missed buyer versus a wasted offer.
+- Check feature importance before adding features.
 
-## 📈 Model Performance
+## Run it
 
-| Metric        | Score |
-|---------------|-------|
-| Accuracy      | 0.70  |
-| Precision     | 0.93  |
-| Recall        | 0.71  |
-| F1-score      | 0.42  |
+```bash
+pip install pandas scikit-learn matplotlib seaborn
+jupyter notebook v25f8fd49c5.ipynb
+```
 
+The notebook reads the file from a Kaggle path. Change the path to the local `customer_booking.csv`.
 
-
----
-
-## 📊 Visualizations
-- Confusion Matrix  
-- Feature Importance Plot  
-- Accuracy/Recall Comparison  
-
----
-
-## 🚀 How to Run
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/holiday-booking-prediction-randomforest.git
-   cd holiday-booking-prediction-randomforest
-Install dependencies:
-
-bash
-Copy
-Edit
-pip install -r requirements.txt
-Run the Jupyter Notebook:
-
-bash
-Copy
-Edit
-jupyter notebook holiday_booking_prediction.ipynb
-📌 Future Improvements
-Add more features from external data sources.
-
-Experiment with Gradient Boosting, XGBoost, and LightGBM.
-
-Use cross-validation for more robust performance metrics.
+Also in this repo: `Predicting Holiday Bookings Using Random Forest.pdf` (slides).
